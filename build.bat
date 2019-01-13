@@ -1,0 +1,1 @@
+uglifyjs --compress --mangle --output output/exif.min.js -- exif.js
