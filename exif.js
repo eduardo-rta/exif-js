@@ -6,6 +6,8 @@
 
     var root = this;
 
+    var stringDecoder = new TextDecoder("UTF-8");
+
     var EXIF = function (obj) {
         if (obj instanceof EXIF) return obj;
         if (!(this instanceof EXIF)) return new EXIF(obj);
@@ -779,7 +781,6 @@
     }
 
     function getStringFromDB(buffer, start, length, isIFD0) {
-        var outstr = "";
         var s = 0;
         var skipLength = 0;
 
@@ -788,6 +789,8 @@
             length--;
         }
 
+        var chrArray = [];
+
         for (var n = start; n < start + length; n++) {
             if (n !== start && skipLength > 0 && s < skipLength) {
                 s++;
@@ -795,10 +798,22 @@
             }
             s = 0;
             var chr = buffer.getUint8(n);
-            var str = String.fromCharCode(chr);
-            outstr += str;
+            chrArray.push(chr);
         }
-        return outstr;
+
+        try {
+            if (!isIFD0) {
+                return stringDecoder.decode(new Uint8Array(chrArray));
+            } else {
+                var outputStr = "";
+                chrArray.forEach(chr => {
+                    outputStr += String.fromCharCode(chr);
+                });
+                return outputStr;
+            }
+        } catch (e) {
+            return "";
+        }
     }
 
     function readEXIFData(file, start) {
@@ -1106,6 +1121,10 @@
     EXIF.readFromBinaryFile = function (file) {
         return findEXIFinJPEG(file);
     }
+
+    EXIF.setStringDecoder = function(decoder) {
+        stringDecoder = decoder;
+    };
 
     if (typeof define === 'function' && define.amd) {
         define('exif-js', [], function () {
