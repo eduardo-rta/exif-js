@@ -806,9 +806,11 @@
                 return stringDecoder.decode(new Uint8Array(chrArray));
             } else {
                 var outputStr = "";
-                chrArray.forEach(chr => {
+                for (var i = 0; i< chrArray.length; i++)
+                {
+                    var chr = chrArray[i];
                     outputStr += String.fromCharCode(chr);
-                });
+                };
                 return outputStr;
             }
         } catch (e) {
